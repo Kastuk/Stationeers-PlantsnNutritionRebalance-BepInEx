@@ -226,7 +226,7 @@ namespace PlantsnNutritionRebalance.Scripts
         private static void HydratingByConsumedQuantity(Item __instance, ref float quantity, ref Thing useOnThing)
         {
            //Egg isEgg = __instance as Egg;
-           if (__instance is INutrition|| __instance is Assets.Scripts.Objects.Items.Egg)//somehow Eggs is not catched just by INutrition check
+           if (__instance is INutrition|| __instance.PrefabName == "ItemEgg") //somehow Eggs is not catched just by INutrition check
             {
                 string food = __instance.PrefabName;
                 float hydrate = 0f;
@@ -253,7 +253,7 @@ namespace PlantsnNutritionRebalance.Scripts
                     case "ItemTomato":
                     case "ItemPumpkin":
                     case "ItemEgg":
-                    case "ItemFertilizedEgg":
+                    //case "ItemFertilizedEgg":
                         waterFraction = 7f; //
                         break;
                     case "ItemPotato":
