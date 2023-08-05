@@ -11,6 +11,9 @@ using System.Reflection;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
+
+    #region Plants and Environment
+
     // Make plants transpirate some of the water they drink:
     [HarmonyPatch(typeof(Plant))]
     public class PlantPatch
@@ -71,6 +74,9 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
+    #endregion Plants and Environment
+
+    #region Human
     [HarmonyPatch(typeof(Human))]
     public static class HumanNutritionHydrationPatch
     {
@@ -207,6 +213,93 @@ namespace PlantsnNutritionRebalance.Scripts
                 //TODO: Make it to calculate the food and hydration based also on the difficulty setting
             }
         }
+    #endregion Human
+
+    #region Food
+
+     //Hydrating by food
+    [HarmonyPatch(typeof(Item), "OnUseItem")] //Plants, Food and Eggs is different consumable Items
+    internal class HydratingFoodPatch
+    {
+        [HarmonyPrefix] //unnamed patching errors on game load
+        [UsedImplicitly]
+        private static void HydratingByConsumedQuantity(Item __instance, ref float quantity, ref Thing useOnThing)
+        {
+           //Egg isEgg = __instance as Egg;
+           if (__instance is INutrition|| __instance is Assets.Scripts.Objects.Items.Egg)//somehow Eggs is not catched just by INutrition check
+            {
+                string food = __instance.PrefabName;
+                float hydrate = 0f;
+                float waterFraction = 0f;
+                switch (food)
+                { //need to balance values of water fractions
+                    //must not forgot, there is MaxHydrationStorage = 42f
+                    case "ItemCornSoup":
+                    case "ItemPumpkinSoup":
+                    case "ItemTomatoSoup":
+                        waterFraction = 25f; //  per 1 unit (1 can)
+                        break;
+                    case "ItemCannedRicePudding":
+                    case "ItemCannedMushroom":
+                    case "ItemCannedEdamame":
+                        waterFraction = 15f; // per 1 unit (1 can)
+                        break;
+                    case "ItemCannedCondensedMilk":
+                        waterFraction = 11f; // per 1 unit (1 can)
+                        break;
+                    case "ItemPumpkinPie":
+                        waterFraction = 10f; // per whole pie
+                        break;
+                    case "ItemTomato":
+                    case "ItemPumpkin":
+                    case "ItemEgg":
+                    case "ItemFertilizedEgg":
+                        waterFraction = 7f; //
+                        break;
+                    case "ItemPotato":
+                    case "ItemCorn":
+                    case "ItemFern":
+                    case "ItemMushroom":
+                    case "ItemSoybean":
+                        waterFraction = 6f; // 
+                        break;
+                    case "ItemCookedSoybean":
+                    case "ItemCookedPumpkin":
+                    case "ItemCookedTomato":
+                    case "ItemCookedCorn":
+                    case "ItemCookedMushroom":
+                    case "ItemPotatoBaked":
+                    case "ItemFries":
+                        waterFraction = 4f; // 
+                        break;
+                    case "ItemCookedCondensedMilk":
+                        waterFraction = 3f; // long and mushy eating
+                        break;
+                    case "ItemSoyOil":
+                        waterFraction = 0.7f; // per 1 gramm
+                        break;
+                    case "ItemMilk":
+                        waterFraction = 0.5f; //rehydrating quite fast, almost like waterbottle
+                        break;
+                        //Kastuk: by idea high-end food is losing most of water by refining of ingredients. Well, canned ones must have water anyway.
+
+                        //TODO: in future after update of cooking system: make contained water in food ingredients be based on Plant.lifeRequirements.WaterPerTick but reduce value by refining, cooking and spoiling. 
+                        // Maybe write in water in cooking components as Hydration damage?
+                        // Harder: Make Water as reagent in recipes. Then reuse that interaction of waterbottle with pots to add water into cooking: HydroponicsUtils.WateringDeviceInHand
+                        // Can take unused Alcohol ingredient as Water for now.
+                        // Contained water must be evaporated from food in dry atmosphere, most faster in vacuum.
+                }
+                Human human = useOnThing as Human;
+                if (human && waterFraction != 0f)
+                {
+                    hydrate = quantity * waterFraction * PlantsnNutritionRebalancePlugin.HydratingFoodWaterFractionMultiplier;
+                    human.Hydrate(hydrate);
+                    Debug.Log("Water got from " + quantity +" units of " + __instance.DisplayName + ": " + hydrate);
+                }
+            }
+        }
+    }
+
 
     // Update food Nutrition Values
     [HarmonyPatch(typeof(Food))]
@@ -304,6 +397,9 @@ namespace PlantsnNutritionRebalance.Scripts
             }
         }
     }
+    #endregion Food
+
+    #region Egg
 
     // Changes fertilized Eggs requisites to hatch:
     [HarmonyPatch(typeof(FertilizedEgg))]
@@ -418,4 +514,5 @@ namespace PlantsnNutritionRebalance.Scripts
             return text;
         }
     }
+    #endregion Egg
 }

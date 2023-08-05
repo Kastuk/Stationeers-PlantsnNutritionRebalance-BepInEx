@@ -1,3 +1,14 @@
+# Additions in this branch:
+Most of consumable food now can quench the thrist too.
+Canned food and juicy plants is best food for rehydratation.
+Milk and soy oil is great drinks, but their vanilla recipes make them costly.
+
+Additional multiplier is added into config to affect water fraction value.
+
+TODO: add water into cooking ingredients.
+
+Original Readme
+===
 # Stationeers mod "Plants and Nutrition" for BepInEx.
 
 For info about what this mod does, read the description in Steam Workshop https://steamcommunity.com/sharedfiles/filedetails/?id=2584817814

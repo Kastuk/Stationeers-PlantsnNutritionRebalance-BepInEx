@@ -34,11 +34,14 @@ namespace PlantsnNutritionRebalance.Scripts
         private ConfigEntry<float> configPlantWaterConsumptionLimit;
         private ConfigEntry<float> configPlantWaterTranspirationPercentage;
         private ConfigEntry<float> configAtmosphereFogThreshold;
+        private ConfigEntry<float> configHydratingFoodWaterFractionMultiplier;
 
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
         public static float PlantWaterTranspirationPercentage;
         public static float AtmosphereFogThreshold;
+        public static float HydratingFoodWaterFractionMultiplier;
+
 
         private void Handleconfig() // Create and manage the configuration file parameters
         {
@@ -78,6 +81,13 @@ namespace PlantsnNutritionRebalance.Scripts
                  "visualization for *ALL* liquids in the atmosphere, not just water. Must be a float number between 0 and 100. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
 
             AtmosphereFogThreshold = Mathf.Clamp(configAtmosphereFogThreshold.Value, 0f, 1000f);
+
+            configHydratingFoodWaterFractionMultiplier = Config.Bind("3 - Food Configuration", // The section under which the option is shown 
+                 "HydratingFoodWaterFractionMultiplier",  // The key of the configuration option in the configuration file
+                 1.0f, // The default value
+                 "This modifier for multiplying contained water by eaten quantity. Formula is EatenQuantity*FoodGroupReducer*ThisModifier"); // Description of the option to show in the config file
+
+           HydratingFoodWaterFractionMultiplier = configHydratingFoodWaterFractionMultiplier.Value;
         }
 
         private void ApplyPatchesWhenPrefabsLoaded()
